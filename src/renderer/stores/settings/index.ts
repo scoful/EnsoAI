@@ -152,6 +152,9 @@ function getInitialState() {
     proxySettings: defaultProxySettings,
     autoCreateSessionOnActivate: false,
 
+    // Git Auto Operations
+    gitAutoFetchEnabled: true,
+
     // Git Clone Settings
     gitClone: defaultGitCloneSettings,
 
@@ -486,6 +489,11 @@ export const useSettingsStore = create<SettingsState>()(
       setAutoCreateSessionOnActivate: (autoCreateSessionOnActivate) =>
         set({ autoCreateSessionOnActivate }),
 
+      setGitAutoFetchEnabled: (gitAutoFetchEnabled) => {
+        set({ gitAutoFetchEnabled });
+        window.electronAPI.git.setAutoFetchEnabled(gitAutoFetchEnabled);
+      },
+
       // Git Clone Setters
       setGitClone: (settings) =>
         set((state) => ({
@@ -764,6 +772,11 @@ export const useSettingsStore = create<SettingsState>()(
             window.electronAPI.webInspector.start().catch((error) => {
               console.error('[WebInspector] Failed to auto-start:', error);
             });
+          }
+
+          // Sync git auto-fetch setting to main process
+          if (state.gitAutoFetchEnabled) {
+            window.electronAPI.git.setAutoFetchEnabled(true);
           }
 
           // Clean up legacy fields (async)
